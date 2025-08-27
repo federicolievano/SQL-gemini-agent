@@ -1,0 +1,69 @@
+name: CD Pipeline - Deploy to Streamlit Cloud
+
+# ¿Cuándo se ejecuta este workflow?
+on:
+  # Solo se ejecuta cuando el CI pasa exitosamente
+  workflow_run:
+    workflows: ["CI Pipeline - SQL Query Assistant"]
+    types: [completed]
+    branches: [main, master]
+
+# ¿Qué hace este workflow?
+jobs:
+  # Job 1: Verificar que el CI pasó
+  check-ci:
+    name: ✅ Verify CI Success
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🔍 Check CI status
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "❌ CI failed, skipping deployment"
+            exit 1
+          fi
+          echo "✅ CI passed, proceeding with deployment"
+      
+      - name: 🚀 Prepare for deployment
+        run: |
+          echo "🚀 Application ready for deployment to Streamlit Cloud"
+          echo "📋 Next steps:"
+          echo "1. Go to https://share.streamlit.io/"
+          echo "2. Connect your GitHub repository"
+          echo "3. Deploy automatically on each push"
+      
+      - name: 📊 Create deployment summary
+        run: |
+          echo "## 🎉 CI/CD Pipeline Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Code Quality**: Passed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Security Scan**: Passed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Application Tests**: Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Ready for Deployment**: Streamlit Cloud" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📋 **Deployment Steps**:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Visit [Streamlit Cloud](https://share.streamlit.io/)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Connect your GitHub repository" >> $GITHUB_STEP_SUMMARY
+          echo "3. Deploy automatically on each push" >> $GITHUB_STEP_SUMMARY
+
+  # Job 2: Notificar éxito
+  notify-success:
+    name: 📢 Notify Success
+    runs-on: ubuntu-latest
+    needs: check-ci
+    
+    steps:
+      - name: 🎉 Deployment Ready
+        run: |
+          echo "🎉 Your SQL Query Assistant is ready for deployment!"
+          echo ""
+          echo "📋 What happens next:"
+          echo "1. CI pipeline passed all checks ✅"
+          echo "2. Code is formatted and tested ✅"
+          echo "3. Ready for Streamlit Cloud deployment ✅"
+          echo ""
+          echo "🚀 Next step: Deploy to Streamlit Cloud" 

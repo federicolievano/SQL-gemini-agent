@@ -61,6 +61,7 @@ logs/
 
 # Streamlit
 .streamlit/
+.streamlit/secrets.toml
 
 # Jupyter Notebook
 .ipynb_checkpoints
