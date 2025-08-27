@@ -1,0 +1,13 @@
+# Requirements for Streamlit Cloud deployment
+# Compatible with Python 3.13+
+
+streamlit>=1.32.0
+langchain>=0.1.0
+langchain-google-genai>=0.0.5
+google-generativeai>=0.3.2
+pymysql>=1.1.0
+python-dotenv>=1.0.0
+pandas>=2.2.0
+
+# Alternative lightweight packages for cloud deployment
+# polars>=0.20.0  # Alternative to pandas, faster and lighter 
