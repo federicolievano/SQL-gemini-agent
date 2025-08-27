@@ -1,10 +1,11 @@
-import streamlit as st
 import google.generativeai as genai
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import PromptTemplate
-from database import execute_query, get_available_tables, get_table_schema
-from config import GEMINI_API_KEY
 import pandas as pd
+import streamlit as st
+from langchain.prompts import PromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+from config import GEMINI_API_KEY
+from database import execute_query, get_available_tables, get_table_schema
 
 # Page configuration
 st.set_page_config(page_title="SQL Query Assistant", page_icon="🗄️", layout="wide")

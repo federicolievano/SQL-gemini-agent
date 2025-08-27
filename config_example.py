@@ -1,6 +1,7 @@
 # Example configuration file - Copy this to config.py and update with your values
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

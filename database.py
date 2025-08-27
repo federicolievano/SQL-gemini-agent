@@ -1,5 +1,6 @@
-import pymysql
 import pandas as pd
+import pymysql
+
 from config import DB_CONFIG
 
 

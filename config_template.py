@@ -2,6 +2,7 @@
 # IMPORTANT: Never commit your actual API keys or passwords to Git!
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
