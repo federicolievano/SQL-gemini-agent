@@ -1,0 +1,157 @@
+name: CI Pipeline - SQL Query Assistant
+
+# ¿Cuándo se ejecuta este workflow?
+on:
+  # Se ejecuta en cada push a cualquier rama
+  push:
+    branches: [ main, master, develop ]
+  
+  # Se ejecuta en cada Pull Request
+  pull_request:
+    branches: [ main, master ]
+
+# ¿Qué hace este workflow?
+jobs:
+  # Job 1: Verificar la calidad del código
+  code-quality:
+    name: 🔍 Code Quality Check
+    runs-on: ubuntu-latest  # Ejecuta en servidor Ubuntu de GitHub
+    
+    steps:
+      # Paso 1: Obtener el código
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Descarga todo el historial de Git
+      
+      # Paso 2: Configurar Python
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'  # Usamos Python 3.11 para compatibilidad
+          cache: 'pip'  # Cachea las dependencias para mayor velocidad
+      
+      # Paso 3: Instalar dependencias
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 black isort  # Herramientas de calidad de código
+      
+      # Paso 4: Verificar sintaxis Python
+      - name: 🔍 Check Python syntax
+        run: |
+          python -m py_compile app.py
+          python -m py_compile database.py
+          python -m py_compile config.py
+          echo "✅ All Python files have valid syntax"
+      
+      # Paso 5: Verificar imports
+      - name: 📚 Check imports
+        run: |
+          python -c "import app; import database; import config; print('✅ All imports successful')"
+      
+      # Paso 6: Linting con flake8
+      - name: 🧹 Run flake8 linting
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      
+      # Paso 7: Formateo de código con black
+      - name: 🎨 Check code formatting with black
+        run: |
+          black --check --diff .
+      
+      # Paso 8: Ordenamiento de imports con isort
+      - name: 📋 Check import sorting with isort
+        run: |
+          isort --check-only --diff .
+
+  # Job 2: Pruebas de seguridad
+  security:
+    name: 🔒 Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 📦 Install security tools
+        run: |
+          pip install bandit safety
+      
+      - name: 🔒 Run security scan with bandit
+        run: |
+          bandit -r . -f json -o bandit-report.json || true
+          echo "Security scan completed"
+      
+      - name: 🛡️ Check for known vulnerabilities
+        run: |
+          safety check --json --output safety-report.json || true
+          echo "Vulnerability check completed"
+
+  # Job 3: Pruebas de la aplicación
+  test-app:
+    name: 🧪 Test Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 📦 Install dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      # Paso 9: Verificar que la aplicación se puede importar
+      - name: 🚀 Test app import
+        run: |
+          python -c "
+          try:
+              import app
+              print('✅ App imports successfully')
+          except Exception as e:
+              print(f'❌ App import failed: {e}')
+              exit(1)
+          "
+      
+      # Paso 10: Verificar configuración
+      - name: ⚙️ Test configuration
+        run: |
+          python -c "
+          try:
+              import config
+              print('✅ Config imports successfully')
+              print(f'Database: {config.DB_CONFIG[\"database\"]}')
+          except Exception as e:
+              print(f'❌ Config import failed: {e}')
+              exit(1)
+          "
+      
+      # Paso 11: Verificar base de datos
+      - name: 🗄️ Test database module
+        run: |
+          python -c "
+          try:
+              import database
+              print('✅ Database module imports successfully')
+          except Exception as e:
+              print(f'❌ Database module import failed: {e}')
+              exit(1)
+          "
+
+# ¿Qué pasa si algo falla?
+# - El workflow se marca como "failed"
+# - GitHub te notifica del error
+# - Puedes ver exactamente qué paso falló
+# - El código NO se despliega automáticamente 
